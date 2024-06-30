@@ -1,61 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>3D Model Viewer</title>
-    <style>
-        body { margin: 0; display: flex; flex-wrap: wrap; }
-        .model-container { width: 50%; height: 50vh; }
-        canvas { display: block; }
-    </style>
-</head>
-<body>
-    <div class="model-container" id="container1"></div>
-    <div class="model-container" id="container2"></div>
-    <div class="model-container" id="container3"></div>
-    <div class="model-container" id="container4"></div>
-    <div class="model-container" id="container5"></div>
+  <head>
+    <meta charset="utf-8" />
+    <title>React App</title>
+  </head>
+  <body>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.141.0/build/three.module.js",
+          "GLTFLoader": "https://unpkg.com/three@0.141.0/examples/jsm/loaders/GLTFLoader.js",
+          "OrbitControls": "https://unpkg.com/three@0.141.0/examples/jsm/controls/OrbitControls.js"
+        }
+      }
+    </script>
+    <script type="module">
+        import { GLTFLoader } from 'GLTFLoader';
+        import * as THREE from 'three';
+        import { OrbitControls } from 'OrbitControls';
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@loaders.gl/core"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@loaders.gl/gltf"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/GLTFLoader.js"></script>
-    <script>
-        function loadModel(containerId, modelPath) {
-            var container = document.getElementById(containerId);
-            var scene = new THREE.Scene();
-            var camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-            var renderer = new THREE.WebGLRenderer();
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            container.appendChild(renderer.domElement);
+        let scene = new THREE.Scene();
+        let renderer = new THREE.WebGLRenderer({
+            canvas: document.querySelector('#canvas'),
+            antialias : true
+        });
 
-            var light = new THREE.AmbientLight(0x404040);
-            scene.add(light);
-            var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-            directionalLight.position.set(1, 1, 1).normalize();
-            scene.add(directionalLight);
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        let camera = new THREE.PerspectiveCamera(30, 1);
+        camera.position.set(0, 0, 15);  // 카메라 위치 설정
+        
+        // OrbitControls를 추가합니다.
+        let controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; // 부드러운 회전을 위한 damping 활성화
+        controls.dampingFactor = 0.25;
 
-            var loader = new THREE.GLTFLoader();
-            loader.load(modelPath, function (gltf) {
-                var model = gltf.scene;
-                model.rotation.y = Math.PI / 2;
-                scene.add(model);
-                animate(); // animate 함수 호출은 gltf.scene이 scene에 추가된 후에 해야 함
-            });
+        let loader = new GLTFLoader();
+        loader.load('3d/dish.gltf', function (gltf) {
+            scene.add(gltf.scene);
+            scene.background = new THREE.Color('black');
+            
+            let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);  // 색상과 강도
+            scene.add(ambientLight);
 
-            camera.position.z = 5;
+            let dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            dirLight.position.set(0, 5, 5);  // 위치 설정
+            scene.add(dirLight);
 
-            function animate() {
+            function animate(){
                 requestAnimationFrame(animate);
+                controls.update(); // OrbitControls 업데이트를 추가합니다.
                 renderer.render(scene, camera);
             }
-        }
-
-        loadModel('container1', 'syrup1.glb');
-        loadModel('container2', 'cream.glb');
-        loadModel('container3', 'dish.glb');
-        loadModel('container4', 'Sstrawberrycake.glb');
-        loadModel('container5', 'strawberrycake.glb');
+            animate();
+        });
     </script>
-</body>
+  </body>
 </html>
