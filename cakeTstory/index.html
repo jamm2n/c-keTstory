@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Model Viewer</title>
+    <style>
+        body { margin: 0; display: flex; flex-wrap: wrap; }
+        .model-container { width: 50%; height: 50vh; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <div class="model-container" id="container1"></div>
+    <div class="model-container" id="container2"></div>
+    <div class="model-container" id="container3"></div>
+    <div class="model-container" id="container4"></div>
+    <div class="model-container" id="container5"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@loaders.gl/core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@loaders.gl/gltf"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/GLTFLoader.js"></script>
+    <script>
+        function loadModel(containerId, modelPath) {
+            var container = document.getElementById(containerId);
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            var light = new THREE.AmbientLight(0x404040);
+            scene.add(light);
+            var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(1, 1, 1).normalize();
+            scene.add(directionalLight);
+
+            var loader = new THREE.GLTFLoader();
+            loader.load(modelPath, function (gltf) {
+                scene.add(gltf.scene);
+                gltf.scene.rotation.y = Math.PI / 2;
+                animate();
+            });
+
+            camera.position.z = 5;
+
+            var animate = function () {
+                requestAnimationFrame(animate);
+                gltf.scene.rotation.y += 0.01;
+                renderer.render(scene, camera);
+            };
+        }
+
+        loadModel('container1', 'syrup1.glb');
+        loadModel('container2', 'cream.glb');
+        loadModel('container3', 'dish.glb');
+        loadModel('container4', 'Sstrawberrycake.glb');
+        loadModel('container5', 'strawberrycake.glb');
+    </script>
+</body>
+</html>
